@@ -1,0 +1,175 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <math.h>
+#include <omp.h>
+void init_blob(double * array, int nx, int ny, double lx, double ly);
+void update_step(double * current, double * next_one, int N);
+/* TODO
+ * new makefile --> link to omp  ---> change from gcc-9.1 to gcc in submitted makelfile
+ * weird thing happening with makefile when make runpar before make parallel
+ * take number of threads as input off command line at runtime???
+ */
+
+
+/*
+ PARALLEL REGIONS
+ * blob initialization
+ * update next step from current step via lax
+ */
+
+int main(int argc, char ** args){
+    
+    // Check correct number of command line arguments
+    if (argc != 8) {
+        perror("Improper number of command line arguments.\nRequires N, NT, L, T, u, v, and nt");
+        return EXIT_FAILURE;
+    }
+    
+    // Initialize timer
+    double start_time = omp_get_wtime();
+    
+    // ESTABLISH INPUT VARIABLES
+    // Matrix dimension
+    int N = atoi(args[1]);
+    // Number of timesteps
+    int NT = atoi(args[2]);
+    // Physical Cartesian Domain Length
+    double L = atof(args[3]); // todo does this need to be a double?
+    // Total Physical Timespan
+    double T = atof(args[4]);
+    // X Velocity Scalar
+    double u = atof(args[5]);
+    // Y Velocity Scalar
+    double v = atof(args[6]);
+    // Number of Threads
+    int nt = atoi(args[7]);
+    printf("TEST PARAMETERS\n---\nMatrix Dimension:  %d\nNumber of Timesteps:  %d\nPhysical Cartesian Domain Length:  %f\nTotal Physical Timespan:  %.2e\nX velocity Scalar:  %.2e\nY velocity Scalar:  %.2e\nNumber of threads:  %d\n", N, NT, L, T, u, v, nt);
+    // 16 because size of double is 8 and we have two matrices of N x N
+    printf("Estimated Memory Use: %.2e KB\n", sizeof(double) * 2 * N * N / 1024.0);
+    // Vanity display of max threads available on system
+    printf("Total Available Threads:  %d\n", omp_get_max_threads());
+    
+    // Set number of threads for the run
+    omp_set_num_threads(nt);
+    
+    // Allocate N x N grid for C^n_{i,j}
+    double * current_step = (double *) malloc(sizeof(double) * N * N); // todo need to cast?
+    // Allocate N x N grid for C^{n+1}_{i,j}
+    double * next_step = (double *) malloc(sizeof(double) * N * N);
+    
+    // Delta x = L/N
+    double delt_x = L / N;
+    // Delta t = T/NT
+    double delt_t = T / NT;
+    
+    // Courant stability condition
+    double courant_right = delt_x / sqrt((pow(u, 2) + pow(v, 2)) * 2);
+    // Asserts Courant Stability is met
+    assert(delt_t <= courant_right);
+    
+    // Calculate Gaussian pulse initial condition
+    init_blob(current_step, N, N, L, L);
+    
+    // File initialization
+    FILE * f0 = fopen("fp0.txt", "w"); // Initial
+    FILE * f1 = fopen("fp1.txt", "w"); // Midway
+    FILE * f2 = fopen("fp2.txt", "w"); // Final
+    
+    // Save initial values
+    for ( int i = 0; i < N * N; i++){
+        fprintf(f0, "%.2e ", current_step[i]);
+        if ((i + 1) % N == 0){
+            fprintf(f0, "\n");
+        }
+    }
+    
+    // Triple nested
+    // DO NOT PARALLELIZE TIMESTEPS
+    // Timestep Loop
+    for (int n = 1; n <= NT; n++){
+        
+        // Save middle step results
+        if (n == NT/2){
+            for ( int i = 0; i < N * N; i++){
+                fprintf(f1, "%.2e ", current_step[i]);
+                if ((i + 1) % N == 0){
+                    fprintf(f1, "\n");
+                }
+            }
+        }
+
+#pragma omp parallel for default(none) shared(delt_x,delt_t,u,v,N,current_step,next_step)
+        for (int i = 0; i < N; i++){
+            for (int j = 0; j < N; j++){
+                
+                // Determine array indices for neighbors
+                int left = i * N + j - 1;
+                int right = i * N + j + 1;
+                int up = (i - 1) * N + j;
+                int down = (i + 1) * N + j;
+
+                // Correct indices as necessary for wraparound
+                if (j == 0){
+                    left += N;
+                }
+                if (j == (N-1)){
+                    right -= N;
+                }
+                if (i == 0){
+                    up += N * N;
+                }
+                if (i == (N-1)){
+                    down -= N * N;
+                }
+                
+                // LAX CALCULATION
+                // left expression
+                double lax1 = (current_step[left] + current_step[right] + current_step[up] + current_step[down])/4.0;
+                // right expression
+                double lax2 = ( (u * (current_step[down] - current_step[up])) + (v * (current_step[right] - current_step[left])) ) * delt_t / (2 * delt_x);
+                // left minus right
+                double lax_final = lax1 - lax2;
+                // store result in "next step" array
+                next_step[i * N + j] = lax_final;
+            }
+        }
+        // swap pointers to prep for next time step
+        double * temp = current_step;
+        current_step = next_step;
+        next_step = temp;
+    }
+    
+    // Print results after final step to file
+    for ( int i = 0; i < N * N; i++){
+        fprintf(f2, "%.2e ", current_step[i]);
+        if ((i + 1) % N == 0){
+            fprintf(f2, "\n");
+        }
+    }
+    
+    // Close files
+    fclose(f0);
+    fclose(f1);
+    fclose(f2);
+    
+    // Print total runtime
+    printf("Total execution time: %.2f seconds\n", omp_get_wtime() - start_time);
+    return EXIT_SUCCESS;
+}
+
+// BLOB INITIALIZATION HELPER FUNCTION
+void init_blob(double * array, int nx, int ny, double lx, double ly){
+    double dx = lx/nx;
+    double dy = ly/ny;
+    // Parallelize the loop: shared data structure, but no race conditions
+#pragma omp parallel for default(none) shared(dx,dy,nx,ny,lx,ly,array)
+    for (int i = 0; i <= nx + 1; i++){
+        double x = -lx/2 + dx*i;
+        for (int j=0;j<=ny+1;j++){
+            double y = -ly/2 + dy*j;
+            array[i * nx + j] = exp(-(x*x + y*y)/(2*lx/16));
+        }
+    }
+    return;
+}
