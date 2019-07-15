@@ -60,6 +60,11 @@ int main(int argc, char ** args){
     FILE * f1 = fopen("f1.txt", "w"); // Midway
     FILE * f2 = fopen("f2.txt", "w"); // Final
 
+    // Check that files open correctly
+    if (f0 == NULL || f1 == NULL || f2 == NULL) {
+        perror("ERROR: Files not opened correctly.");
+        return EXIT_FAILURE;
+    
     // Save initial values
     for ( int i = 0; i < N * N; i++){
         fprintf(f0, "%.2e ", current_step[i]);
