@@ -105,7 +105,7 @@ int main(int argc, char ** args){
             }
         }
 
-#pragma omp parallel for default(none) shared(delt_x,delt_t,u,v,N,current_step,next_step)
+#pragma omp parallel for default(none) shared(delt_x,delt_t,u,v,N,current_step,next_step) schedule(static)
         for (int i = 0; i < N; i++){
             for (int j = 0; j < N; j++){
                 
@@ -169,7 +169,7 @@ void init_blob(double * array, int nx, int ny, double lx, double ly){
     double dx = lx/nx;
     double dy = ly/ny;
     // Parallelize the loop: shared data structure, but no race conditions
-#pragma omp parallel for default(none) shared(dx,dy,nx,ny,lx,ly,array)
+#pragma omp parallel for default(none) shared(dx,dy,nx,ny,lx,ly,array) schedule(static)
     for (int i = 0; i < nx; i++){
         double x = -lx/2 + dx*i;
         for (int j = 0; j < ny; j++){
