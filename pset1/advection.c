@@ -141,14 +141,14 @@ int main(int argc, char ** args){
         current_step = next_step;
         next_step = temp;*/
     }
-    
+    /*
     // Print results after final step to file
     for ( int i = 0; i < N * N; i++){
         fprintf(f2, "%.2e ", current_step[i]);
         if ((i + 1) % N == 0){
             fprintf(f2, "\n");
         }
-    }
+    }*/
     
     // Close files
     fclose(f0);

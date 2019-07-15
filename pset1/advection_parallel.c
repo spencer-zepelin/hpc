@@ -170,9 +170,9 @@ void init_blob(double * array, int nx, int ny, double lx, double ly){
     double dy = ly/ny;
     // Parallelize the loop: shared data structure, but no race conditions
 #pragma omp parallel for default(none) shared(dx,dy,nx,ny,lx,ly,array)
-    for (int i = 0; i <= nx + 1; i++){
+    for (int i = 0; i < nx; i++){
         double x = -lx/2 + dx*i;
-        for (int j=0;j<=ny+1;j++){
+        for (int j = 0; j < ny; j++){
             double y = -ly/2 + dy*j;
             array[i * nx + j] = exp(-(x*x + y*y)/(2*lx/16));
         }
