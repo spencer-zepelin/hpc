@@ -38,9 +38,9 @@ int main(int argc, char ** args){
     printf("Estimated Memory Use:  %.2e KB\n", sizeof(double) * 2 * N * N / 1024.0);
     
     // Allocate N x N grid for C^n_{i,j}
-    double * current_step = (double *) malloc(sizeof(double) * N * N);
+    double * current_step = (double*) malloc(sizeof(double) * N * N);
     // Allocate N x N grid for C^{n+1}_{i,j}
-    double * next_step = (double *) malloc(sizeof(double) * N * N);
+    double * next_step = (double*) malloc(sizeof(double) * N * N);
     
     // Delta x = L/N
     double delt_x = L / N;
@@ -124,10 +124,22 @@ int main(int argc, char ** args){
                 next_step[i * N + j] = lax_final;
             }
         }
-        // swap pointers to prep for next time step
+        
+        // write back to previous
+        for ( int i = 0; i < N*N; i++){
+            current_step[i] = next_step[i];
+        }
+        
+        if (current_step == NULL || next_step == NULL){
+            perror("Problem with memory allocation!!!\n");
+            return EXIT_FAILURE;
+        }
+        
+        
+        /*// swap pointers to prep for next time step
         double * temp = current_step;
         current_step = next_step;
-        next_step = temp;
+        next_step = temp;*/
     }
     
     // Print results after final step to file
@@ -142,6 +154,13 @@ int main(int argc, char ** args){
     fclose(f0);
     fclose(f1);
     fclose(f2);
+    /*
+    if (current_step){
+        free(current_step);
+    }
+    if (next_step){
+        free(next_step);
+    }*/
     
     // Calculate elapsed time
     double elapsed = ((double) (clock() - stopwatch)) / CLOCKS_PER_SEC;
@@ -157,9 +176,10 @@ void init_blob(double * array, int nx, int ny, double lx, double ly){
     double dx = lx/nx;
     double dy = ly/ny;
 
-    for (int i = 0; i <= nx + 1; i++){
+    //fTODOor (int i = 0; i <= nx + 1; i++){
+    for (int i = 0; i < nx; i++){
         x = -lx/2 + dx*i;
-        for (int j=0;j<=ny+1;j++){
+        for (int j = 0; j < ny;j++){
             y = -ly/2 + dy*j;
             array[i * nx + j] = exp(-(x*x + y*y)/(2*lx/16));
         }
