@@ -160,7 +160,7 @@ int main(int argc, char ** args){
     fclose(f2);
     
     // Print total runtime
-    printf("Total execution time: %.2f seconds\n", omp_get_wtime() - start_time);
+    printf("Total execution time: %.4f seconds\n", omp_get_wtime() - start_time);
     return EXIT_SUCCESS;
 }
 
