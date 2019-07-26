@@ -1,5 +1,5 @@
 test: advection_modes.c
-	mpicc -o mpirun advection_modes.c -fopenmp -lm
+	mpicc -std=c99 -o mpirun advection_modes.c -fopenmp -lm
 
 try: test
 	mpiexec -n 36 ./mpirun 5040 300 1.0 1.0e3 5.0e-7 2.85e-7 1 mpi_blocking
