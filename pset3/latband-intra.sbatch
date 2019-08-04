@@ -1,5 +1,5 @@
 #! / bin /bash
-#SBATCH --time =00:05:00
+#SBATCH --time=00:05:00
 #SBATCH --partition=broadwl
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=2
