@@ -33,16 +33,11 @@ void timesteps_nonmpi(double * current_step, double * next_step, int N, double u
 void timesteps_nonmpi_threads(double * current_step, double * next_step, int N, double u, double v, double delt_x, double delt_t);
 void timesteps_mpi(double * current_step, double * next_step, double ** ghosts, int procdim, double u, double v, double delt_x, double delt_t);
 void timesteps_mpi_threads(double * current_step, double * next_step, double ** ghosts, int procdim, double u, double v, double delt_x, double delt_t);
-//void file_write_mpi(FILE ** fh, int nprocs_per_dim, int N_proc, int mype, double ** ghosts, double * data, MPI_Status status);
+void file_write_mpi(FILE ** fh, int nprocs_per_dim, int N_proc, int mype, double ** ghosts, double * data, MPI_Status status);
 void nonblocking_message_pass(int N_proc, double ** ghosts, double * data, int up, int down, int left, int right);
 void blocking_message_pass(int N_proc, double ** ghosts, double * data, int up, int down, int left, int right, MPI_Status status);
 void allocate_ghosts(double ** ghosts, int N_proc);
 void mpi_neighbors(int nprocs, int mype, int * up, int * down, int * left, int * right);
-
-/* TODO
- * enforce number of procs is square
- * close files AND FREE MEMORY
- */
 
 int main(int argc, char ** args){
     
@@ -124,35 +119,34 @@ int main(int argc, char ** args){
 /*** SERIAL BRANCH ***/
         if (runtype == SERIAL){
             init_blob(current_step, N, N, L, L);
-//            fwrite(current_step, sizeof(double), N * N, f0);
+            fwrite(current_step, sizeof(double), N * N, f0);
             for (int n = 1; n <= NT; n++){
                 timesteps_nonmpi(current_step, next_step, N, u, v, delt_x, delt_t);
                 double * temp = current_step;
                 current_step = next_step;
                 next_step = temp;
-//                if (n == NT/2){
-//                    fwrite(current_step, sizeof(double), N * N, f1);
-//                }
+                if (n == NT/2){
+                    fwrite(current_step, sizeof(double), N * N, f1);
+                }
             }
-//            fwrite(current_step, sizeof(double), N * N, f2);
+            fwrite(current_step, sizeof(double), N * N, f2);
 
         }
 /*** OMP PARALLELISM BRANCH ***/
         else if (runtype == THREADS){
             init_blob_threads(current_step, N, N, L, L);
-//            fwrite(current_step, sizeof(double), N * N, f0);
+            fwrite(current_step, sizeof(double), N * N, f0);
             for (int n = 1; n <= NT; n++){
                 timesteps_nonmpi_threads(current_step, next_step, N, u, v, delt_x, delt_t);
                 double * temp = current_step;
                 current_step = next_step;
                 next_step = temp;
-//                if (n == NT/2){
-//                    fwrite(current_step, sizeof(double), N * N, f1);
-//                }
+                if (n == NT/2){
+                    fwrite(current_step, sizeof(double), N * N, f1);
+                }
             }
-//            fwrite(current_step, sizeof(double), N * N, f2);
+            fwrite(current_step, sizeof(double), N * N, f2);
         }
-        //TODO CLOSE FILES AND FREE MEMORY
         printf("Total execution time: %.4f seconds\n\n", omp_get_wtime() - start_time);
     }
 /*** MPI BRANCHES ***/
@@ -201,7 +195,7 @@ int main(int argc, char ** args){
                 }
             }
             MPI_Barrier(MPI_COMM_WORLD);
-//            file_write_mpi(&f0, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
+            file_write_mpi(&f0, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
             for (int n = 1; n <= NT; n++){
                 if (n % 1000 == 0){
                     if (mype == 0){
@@ -217,13 +211,13 @@ int main(int argc, char ** args){
                 double * temp = current_step;
                 current_step = next_step;
                 next_step = temp;
-//                if (n == NT/2){
-//                    MPI_Barrier(MPI_COMM_WORLD);
-//                    file_write_mpi(&f1, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
-//                }
+                if (n == NT/2){
+                    MPI_Barrier(MPI_COMM_WORLD);
+                    file_write_mpi(&f1, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
+                }
             }
             MPI_Barrier(MPI_COMM_WORLD);
-//            file_write_mpi(&f2, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
+            file_write_mpi(&f2, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
         }
 /*** MPI-OMP HYBRID BRANCH ***/
         else if (runtype == HYBRID){
@@ -235,7 +229,7 @@ int main(int argc, char ** args){
                 }
             }
             MPI_Barrier(MPI_COMM_WORLD);
-//            file_write_mpi(&f0, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
+            file_write_mpi(&f0, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
             for (int n = 1; n <= NT; n++){
                 if (n % 1000 == 0){
                     if (mype == 0){
@@ -247,15 +241,14 @@ int main(int argc, char ** args){
                 double * temp = current_step;
                 current_step = next_step;
                 next_step = temp;
-//                if (n == NT/2){
-//                    MPI_Barrier(MPI_COMM_WORLD);
-//                    file_write_mpi(&f1, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
-//                }
+                if (n == NT/2){
+                    MPI_Barrier(MPI_COMM_WORLD);
+                    file_write_mpi(&f1, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
+                }
             }
             MPI_Barrier(MPI_COMM_WORLD);
-//            file_write_mpi(&f2, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
+            file_write_mpi(&f2, nprocs_per_dim, N_proc, mype, ghosts, current_step, status);
         }
-        // TODO CLOSE FILES AND FREE MEMORY
         // Print total runtime
         MPI_Barrier(MPI_COMM_WORLD);
         if (mype == 0){
@@ -497,50 +490,49 @@ void timesteps_mpi_threads(double * current_step, double * next_step, double ** 
     return;
 }
 
-//void file_write_mpi(FILE ** fh, int nprocs_per_dim, int N_proc, int mype, double ** ghosts, double * data, MPI_Status status){
-//    for (int n = 0; n < nprocs_per_dim; n++){
-//        for (int j = 0; j < N_proc; j++){
-//            for (int m = 0; m < nprocs_per_dim; m++){
-//                int sender = n * nprocs_per_dim + m;
-//                MPI_Barrier(MPI_COMM_WORLD);
-//                // Send command
-//                if (mype == sender && sender != 0){
-//                    MPI_Send(&data[N_proc * j], // pointer to row of data
-//                             N_proc, // Number of elements I am sending
-//                             MPI_DOUBLE, // datatype
-//                             0, // destination --> proc 0
-//                             99, // tag
-//                             MPI_COMM_WORLD); // communicator
-//                }
-//
-//                // Receive command
-//                if (mype == 0 && sender != 0){
-//                    MPI_Recv(ghosts[WRITE], // pointer to buffer
-//                             N_proc, // number of elements
-//                             MPI_DOUBLE, // datatype
-//                             sender,
-//                             99, // tag
-//                             MPI_COMM_WORLD, // communicator
-//                             &status);
-//                }
-//                // write data to file
-//                if (mype == 0){
-//                    if (sender == 0){
-//                        fwrite(&data[N_proc * j], sizeof(double), N_proc, *fh);
-//                    }else{
-//                        fwrite(ghosts[WRITE], sizeof(double), N_proc, *fh);
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    return;
-//}
+void file_write_mpi(FILE ** fh, int nprocs_per_dim, int N_proc, int mype, double ** ghosts, double * data, MPI_Status status){
+    for (int n = 0; n < nprocs_per_dim; n++){
+        for (int j = 0; j < N_proc; j++){
+            for (int m = 0; m < nprocs_per_dim; m++){
+                int sender = n * nprocs_per_dim + m;
+                MPI_Barrier(MPI_COMM_WORLD);
+                // Send command
+                if (mype == sender && sender != 0){
+                    MPI_Send(&data[N_proc * j], // pointer to row of data
+                             N_proc, // Number of elements I am sending
+                             MPI_DOUBLE, // datatype
+                             0, // destination --> proc 0
+                             99, // tag
+                             MPI_COMM_WORLD); // communicator
+                }
+
+                // Receive command
+                if (mype == 0 && sender != 0){
+                    MPI_Recv(ghosts[WRITE], // pointer to buffer
+                             N_proc, // number of elements
+                             MPI_DOUBLE, // datatype
+                             sender,
+                             99, // tag
+                             MPI_COMM_WORLD, // communicator
+                             &status);
+                }
+                // write data to file
+                if (mype == 0){
+                    if (sender == 0){
+                        fwrite(&data[N_proc * j], sizeof(double), N_proc, *fh);
+                    }else{
+                        fwrite(ghosts[WRITE], sizeof(double), N_proc, *fh);
+                    }
+                }
+            }
+        }
+    }
+    return;
+}
 
 
 void nonblocking_message_pass(int N_proc, double ** ghosts, double * data, int up, int down, int left, int right){
 
-    /*** MESSAGE PASSING ***/
     // load left and right column data into buffers
     for (int i = 0; i < N_proc; i++){
         ghosts[SENDLEFT][i] = data[i * N_proc];
@@ -656,7 +648,7 @@ void allocate_ghosts(double ** ghosts, int N_proc){
 }
 
 void mpi_neighbors(int nprocs, int mype, int * up, int * down, int * left, int * right){
-      /*** DETERMINE ORTHOGONAL NEIGHBORS ***/
+
       int nprocs_per_dim = sqrt(nprocs); // sqrt or cube root for 2D, 3D
     
       int grid_row = mype / nprocs_per_dim;
