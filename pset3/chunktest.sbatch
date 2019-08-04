@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=28
 #SBATCH --cpus-per-task=1
 #SBATCH --exclusive
-module load openmpi
+module load mpich
 mpirun -n 56 ./julia_modes dynamic 12096 128
 mpirun -n 56 ./julia_modes dynamic 12096 256
 mpirun -n 56 ./julia_modes dynamic 12096 512

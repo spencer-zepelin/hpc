@@ -5,5 +5,5 @@
 #SBATCH --ntasks-per-node=2
 #SBATCH --cpus-per-task=1
 #SBATCH --exclusive
-module load openmpi
+module load mpich
 mpirun -n 2 ./latencybandwidth
