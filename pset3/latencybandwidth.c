@@ -96,7 +96,7 @@ int main(int argc, char ** args){
 	}
 
 	double gb_start = MPI_Wtime();
-	for (int i = 0; i < 60; i++){
+	for (int i = 0; i < 30; i++){
 		if (mype == 0){
 			MPI_Send(&band_buf[i], gig_size, MPI_BYTE, 1, 99, MPI_COMM_WORLD);
 		}
@@ -106,7 +106,7 @@ int main(int argc, char ** args){
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 	double gb_end = MPI_Wtime();
-	total_byes_sent = gig_size * 60.0;
+	total_byes_sent = gig_size * 30.0;
 	total_gigs_sent = total_byes_sent / gig_size;
 	secs_elapsed = gb_end - gb_start;
 	gbs = total_gigs_sent / secs_elapsed;
