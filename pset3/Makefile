@@ -6,6 +6,9 @@ mpi: test
 	mpiexec -n 2 ./julia_modes static 
 	mpiexec -n 2 ./julia_modes dynamic 10000 10000
 
+chunk: test
+	mpiexec -n 2 ./julia_modes dynamic 10000 10000
+
 serial: test
 	./julia 1000
 
