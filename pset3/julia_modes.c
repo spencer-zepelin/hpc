@@ -5,7 +5,6 @@
 #include <string.h>
 
 #define MAX 1000
-#define CHUNKSIZE 10000
 
 /*** LABELS FOR RUN MODE ***/
 #define STATIC 0
@@ -150,6 +149,7 @@ int main(int argc, char ** args){
 	    if (mype == 0){
 	    	MPI_File_open(MPI_COMM_SELF, "data_mpi_dynamic.bin", 
 	    		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+	    	printf("Initial assignments successfully sent\n\n");
 	    }
 	    		
 	    // Code for worker nodes
@@ -158,9 +158,10 @@ int main(int argc, char ** args){
 	    	while (current_index < N * N){
 	    		int loops = chunk;
 	    		// Conditional for final chunk to prevent unnecessary work
-	    		if ( (current_index + chunk) > (N * N) ){
-	    			loops = (N * N) - chunk;
-	    		}
+	    		// TODO TESTING THIS
+	    		// if ( (current_index + chunk) > (N * N) ){
+	    		// 	loops = (N * N) - chunk;
+	    		// }
 	    		// Make calculations
 		    	for (int i = 0; i < loops; i++){
 					int row = (current_index + i) / N;
