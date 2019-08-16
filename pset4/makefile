@@ -5,7 +5,7 @@ try: compile
 	./raytrace 1000 10000000
 
 parallel: raytrace_cuda.cu
-	nvcc -arch=sm_37 raytrace_cuda.cu -o raytrace_cuda
+	nvcc -Xcompiler -arch=sm_37 raytrace_cuda.cu -o raytrace_cuda
 
 run: parallel
 	./raytrace_cuda 1000 100000000

@@ -18,14 +18,14 @@
 #define THREADSPERBLOCK 1000
 
 __global__ void ray_thread(double *G, int *n, double *wmax, double *r, double *L, double *c);
-__global__ double dot3(double * vec1, double * vec2);
-__global__ double mag3(double * vec);
+__device__ double dot3(double * vec1, double * vec2);
+__device__ double mag3(double * vec);
 __global__ void scale3(double scalar, double * in_vec, double * out);
 __global__ void subvec3(double * vec1, double * vec2, double * diff);
-__global__ int gridindex(double * vec, int grid_dim, double window_dim);
+__device__ int gridindex(double * vec, int grid_dim, double window_dim);
 __global__ void sample_vec(double * vec, uint64_t * seed);
-__global__ double LCG_random_double(uint64_t * seed);
-__global__ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n);
+__device__ double LCG_random_double(uint64_t * seed);
+__device__ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n);
 
 /***
 NOTE: for the purpose of this assignment, 
@@ -175,12 +175,12 @@ __global__ void ray_thread(double *G, int *n, double *wmax, double *r, double *L
 	// Calculate brightness; if brightness < 0, use 0
 	brightness = fmax(0, dot3(S, N));
 	int index = gridindex(w, *n, *wmax);
-	atomicAdd_system(&G[index], brightness);
+	atomicAdd(&G[index], brightness);
 }
 
 
 // Calculates 3d dot product
-__global__ double dot3(double * vec1, double * vec2){
+__device__ double dot3(double * vec1, double * vec2){
 	double out = 0;
 	for (int i = 0; i < 3; i++){
 		out = out + (vec1[i] * vec2[i]);
@@ -188,7 +188,7 @@ __global__ double dot3(double * vec1, double * vec2){
 	return out;
 }
 
-__global__ double mag3(double * vec){
+__device__ double mag3(double * vec){
 	double out = sqrt( (vec[0] * vec[0]) + (vec[1] * vec[1]) + (vec[2] * vec[2]) );
 	return out;
 }
@@ -206,7 +206,7 @@ __global__ void subvec3(double * vec1, double * vec2, double * diff){
 }
 
 
-__global__ int gridindex(double * vec, int grid_dim, double window_dim){
+__device__ int gridindex(double * vec, int grid_dim, double window_dim){
 	// Correct offset to make positive
 	vec[X] = vec[X] + window_dim;
 	vec[Z] = vec[Z] + window_dim;
@@ -234,7 +234,7 @@ __global__ void sample_vec(double * vec, uint64_t * seed){
 	vec[Z] = cos_theta;
 }
 
-__global__ double LCG_random_double(uint64_t * seed){
+__device__ double LCG_random_double(uint64_t * seed){
 	// LCG parameters
 	const uint64_t m = 9223372036854775808ULL; // 2^63
 	const uint64_t a = 2806196910506780709ULL;
@@ -244,7 +244,7 @@ __global__ double LCG_random_double(uint64_t * seed){
 	return (double) (*seed) / (double) m;
 }
 
-__global__ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n){
+__device__ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n){
 	const uint64_t m = 9223372036854775808ULL; // 2^63
 	const uint64_t a = 2806196910506780709ULL;
 	const uint64_t c = 1ULL;
