@@ -20,10 +20,10 @@
 __global__ void ray_thread(double *G, int *n, double *wmax, double *r, double *L, double *c);
 __device__ double dot3(double * vec1, double * vec2);
 __device__ double mag3(double * vec);
-__global__ void scale3(double scalar, double * in_vec, double * out);
-__global__ void subvec3(double * vec1, double * vec2, double * diff);
+__device__ void scale3(double scalar, double * in_vec, double * out);
+__device__ void subvec3(double * vec1, double * vec2, double * diff);
 __device__ int gridindex(double * vec, int grid_dim, double window_dim);
-__global__ void sample_vec(double * vec, uint64_t * seed);
+__device__ void sample_vec(double * vec, uint64_t * seed);
 __device__ double LCG_random_double(uint64_t * seed);
 __device__ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n);
 
@@ -193,13 +193,13 @@ __device__ double mag3(double * vec){
 	return out;
 }
 
-__global__ void scale3(double scalar, double * in_vec, double * out){
+__device__ void scale3(double scalar, double * in_vec, double * out){
 	for (int i = 0; i < 3; i++){
 		out[i] = scalar * in_vec[i];
 	}
 }
 
-__global__ void subvec3(double * vec1, double * vec2, double * diff){
+__device__ void subvec3(double * vec1, double * vec2, double * diff){
 	for (int i = 0; i < 3; i++){
 		diff[i] = vec1[i] - vec2[i];
 	}
@@ -225,7 +225,7 @@ __device__ int gridindex(double * vec, int grid_dim, double window_dim){
 	return (row * grid_dim) + column;
 }
 
-__global__ void sample_vec(double * vec, uint64_t * seed){
+__device__ void sample_vec(double * vec, uint64_t * seed){
 	double phi = LCG_random_double(seed) * 2 * M_PI;
 	double cos_theta = -1.0 + (2.0 * LCG_random_double(seed));
 	double sin_theta = sqrt(1 - pow(cos_theta, 2));
@@ -246,8 +246,8 @@ __device__ double LCG_random_double(uint64_t * seed){
 
 __device__ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n){
 	const uint64_t m = 9223372036854775808ULL; // 2^63
-	const uint64_t a = 2806196910506780709ULL;
-	const uint64_t c = 1ULL;
+	uint64_t a = 2806196910506780709ULL;
+	uint64_t c = 1ULL;
 	n = n % m;
 	uint64_t a_new = 1;
 	uint64_t c_new = 0;
