@@ -29,7 +29,6 @@
 #define Y 1
 #define Z 2
 
-#define BLOCKS 100000
 #define THREADSPERBLOCK 1000
 
 __global__ void ray_thread(double *G, int *n, double *wmax, double *r, double *L, double *c);
@@ -87,6 +86,8 @@ int main(int agrc, char ** args){
 	// TODO arg check
 	// user-defined number of rays
 	int num_rays = atoi(args[2]);
+
+	int blocks = num_rays/THREADSPERBLOCK;
 	// todo parse blocks and threads per block based on this??
 	// Below will all be passed to kernel
 	// user-defined grid dimension
@@ -133,7 +134,7 @@ int main(int agrc, char ** args){
 
     // TODO what is the correct number of blocks and threads per block
     // Initialize the kernel
-    ray_thread<<<BLOCKS,THREADSPERBLOCK>>>(d_G, d_n, d_wmax, d_r, d_L, d_c);
+    ray_thread<<<blocks,THREADSPERBLOCK>>>(d_G, d_n, d_wmax, d_r, d_L, d_c);
 
     // Copy device grid back to host
     cudaMemcpy(h_G, d_G, n * n * sizeof(double), cudaMemcpyDeviceToHost);
