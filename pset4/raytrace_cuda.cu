@@ -4,20 +4,20 @@
 #include <stdint.h>
 #include <cuda.h>
 
-#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
-#else
-static __inline__ __device__ double atomicAdd(double *address, double val) {
-    unsigned long long int* address_as_ull = (unsigned long long int*)address;
-    unsigned long long int old = *address_as_ull, assumed;
-    if (val==0.0)
-        return __longlong_as_double(old);
-    do {
-        assumed = old;
-        old = atomicCAS(address_as_ull, assumed, __double_as_longlong(val +__longlong_as_double(assumed)));
-    } while (assumed != old);
-    return __longlong_as_double(old);
-}
-#endif
+// #if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
+// #else
+// static __inline__ __device__ double atomicAdd(double *address, double val) {
+//     unsigned long long int* address_as_ull = (unsigned long long int*)address;
+//     unsigned long long int old = *address_as_ull, assumed;
+//     if (val==0.0)
+//         return __longlong_as_double(old);
+//     do {
+//         assumed = old;
+//         old = atomicCAS(address_as_ull, assumed, __double_as_longlong(val +__longlong_as_double(assumed)));
+//     } while (assumed != old);
+//     return __longlong_as_double(old);
+// }
+// #endif
 
 /** Hardcoded Variables **/
 #define WMAX 10.0
@@ -190,7 +190,7 @@ __global__ void ray_thread(double *G, int *n, double *wmax, double *r, double *L
 	// Calculate brightness; if brightness < 0, use 0
 	brightness = fmax(0, dot3(S, N));
 	int index = gridindex(w, *n, *wmax);
-	atomicAdd((float *) &G[index], (float *) brightness);
+	atomicAdd( &G[index], brightness);
 }
 
 
