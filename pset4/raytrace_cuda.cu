@@ -190,7 +190,7 @@ __global__ void ray_thread(double *G, int *n, double *wmax, double *r, double *L
 	// Calculate brightness; if brightness < 0, use 0
 	brightness = fmax(0, dot3(S, N));
 	int index = gridindex(w, *n, *wmax);
-	atomicAdd(&G[index], brightness);
+	atomicAdd((float *) &G[index], (float *) brightness);
 }
 
 
