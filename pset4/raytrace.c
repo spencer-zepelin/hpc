@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <time.h>
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 /** Hardcoded Variables **/
 #define WMAX 10.0
 #define RADIUS 6.0
