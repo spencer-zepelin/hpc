@@ -81,7 +81,7 @@ Adding timing functionality
 ***/
 
 
-int main(int agrc, char ** args){
+int main(int argc, char ** args){
 
 	// arg check
 	if (argc != 3){
@@ -160,6 +160,7 @@ int main(int agrc, char ** args){
 	cudaFree(d_L);
 	cudaFree(d_c);
 	cudaFree(d_G);
+
 	// Calculate elapsed time
     double elapsed = ((double) (clock() - stopwatch)) / CLOCKS_PER_SEC;
     
