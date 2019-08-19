@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdint.h>
+#include <time.h>
 
 /** Hardcoded Variables **/
 #define WMAX 10.0
@@ -63,9 +64,18 @@ Adding timing functionality
 ***/
 
 
-int main(int agrc, char ** args){
+int main(int argc, char ** args){
 
-	// TODO arg check
+	// arg check
+	if (argc != 3){
+		printf("---Incorrect Arguments---\nProgram should be run with the following:\n    EXECUTABLE GRIDDIMENSION NUMBER-OF-RAYS\n");
+		return EXIT_SUCCESS;
+	}
+
+	// Initialize timer
+    clock_t stopwatch;
+    // Start time
+    stopwatch = clock();
 
 	// user-defined grid dimension
 	int n = atoi(args[1]);
@@ -90,7 +100,7 @@ int main(int agrc, char ** args){
 	double * G = (double *) calloc(n * n, sizeof(double)); // calloc initializes allocated memory to 0
 
 	// Seed random number generator
-	uint64_t seed = 1;
+	uint64_t seed = 424242;
 
 
 	for (int i = 0; i < num_rays; i ++){
@@ -126,8 +136,15 @@ int main(int agrc, char ** args){
 
 	FILE * f0 = fopen("data.bin", "wb"); 
 	fwrite(G, sizeof(double), n * n, f0);
+	fclose(f0);
+	free(G);
 
-	// TODO close file
+	// Calculate elapsed time
+    double elapsed = ((double) (clock() - stopwatch)) / CLOCKS_PER_SEC;
+    
+    // Print total runtime
+    printf("Total execution time: %.2f seconds\n", elapsed);
+    return EXIT_SUCCESS;
 }
 
 /*** Helper Functions ***/

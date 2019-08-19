@@ -83,7 +83,17 @@ Adding timing functionality
 
 int main(int agrc, char ** args){
 
-	// TODO arg check
+	// arg check
+	if (argc != 3){
+		printf("---Incorrect Arguments---\nProgram should be run with the following:\n    EXECUTABLE GRIDDIMENSION NUMBER-OF-RAYS\n");
+		return EXIT_SUCCESS;
+	}
+
+	// Initialize timer
+    clock_t stopwatch;
+    // Start time
+    stopwatch = clock();
+
 	// user-defined number of rays
 	int num_rays = atoi(args[2]);
 
@@ -132,7 +142,6 @@ int main(int agrc, char ** args){
     // Set CUDA memory to 0
     cudaMemset(d_G, 0, n * n * sizeof(double));
 
-    // TODO what is the correct number of blocks and threads per block
     // Initialize the kernel
     ray_thread<<<blocks,THREADSPERBLOCK>>>(d_G, d_n, d_wmax, d_r, d_L, d_c);
 
@@ -142,10 +151,24 @@ int main(int agrc, char ** args){
 
 	FILE * f0 = fopen("data.bin", "wb"); 
 	fwrite(h_G, sizeof(double), n * n, f0);
-	// TODO free host memory
-	// Close file
+	// Close file and free memory
 	fclose(f0);
+	free(h_G);
+	cudaFree(d_n);
+	cudaFree(d_wmax);
+	cudaFree(d_r);
+	cudaFree(d_L);
+	cudaFree(d_c);
+	cudaFree(d_G);
+	// Calculate elapsed time
+    double elapsed = ((double) (clock() - stopwatch)) / CLOCKS_PER_SEC;
+    
+    // Print total runtime
+    printf("Total execution time: %.2f seconds\n", elapsed);
+    return EXIT_SUCCESS;
 }
+
+
 
 /*** Helper Functions ***/
 
