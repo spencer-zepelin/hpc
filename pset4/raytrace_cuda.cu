@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <cuda.h>
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 // #if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
 // #else
 // static __inline__ __device__ double atomicAdd(double *address, double val) {
@@ -49,6 +53,8 @@ all vectors are assumed to have dimensionality of 3
 TODO
 
 TIMING
+
+MODULE LOAD CUDA --> not compiling with this atomic add when cuda 10 used
 
 seed random?
 Validate random elements working correctly
