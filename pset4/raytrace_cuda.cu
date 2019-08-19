@@ -33,7 +33,7 @@
 #define Y 1
 #define Z 2
 
-#define THREADSPERBLOCK 1000
+// #define THREADSPERBLOCK 1000
 
 __global__ void ray_thread(double *G, int *n, double *wmax, double *r, double *L, double *c);
 __device__ double dot3(double * vec1, double * vec2);
@@ -90,7 +90,7 @@ Adding timing functionality
 int main(int argc, char ** args){
 
 	// arg check
-	if (argc != 3){
+	if (argc < 3){
 		printf("---Incorrect Arguments---\nProgram should be run with the following:\n    EXECUTABLE GRIDDIMENSION NUMBER-OF-RAYS\n");
 		return EXIT_SUCCESS;
 	}
@@ -103,7 +103,9 @@ int main(int argc, char ** args){
 	// user-defined number of rays
 	int num_rays = atoi(args[2]);
 
-	int blocks = num_rays/THREADSPERBLOCK;
+	int THREADSPERBLOCK = atoi(args[3]);
+
+	int blocks = (num_rays + THREADSPERBLOCK - 1) / THREADSPERBLOCK;
 	// todo parse blocks and threads per block based on this??
 	// Below will all be passed to kernel
 	// user-defined grid dimension
