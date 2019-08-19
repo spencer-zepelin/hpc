@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <cuda.h>
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 
 // #if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
 // #else
