@@ -1,11 +1,11 @@
 compile: raytrace.c
-	gcc -std=c99 -Wall -pedantic -Werror raytrace.c -o raytrace
+	gcc -std=c99 -Wall -pedantic -Werror raytrace.c -o raytrace -lm
 
 try: compile
 	./raytrace 1000 10000000
 
 parallel: raytrace_cuda.cu
-	nvcc -arch=sm_37 raytrace_cuda.cu -o raytrace_cuda
+	nvcc -arch=sm_37 raytrace_cuda.cu -o raytrace_cuda -lm
 
 run: parallel
 	./raytrace_cuda 1000 1000000000
