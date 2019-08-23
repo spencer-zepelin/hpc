@@ -41,8 +41,8 @@ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n);
 
 // parallel.c
 #ifdef MPI
-void run_parallel_problem(int nBodies, double dt, int nIters, char * fname);
-void compute_forces_multi_set(Body * local, Body * remote, double dt, int n);
+void compute_forces_multi_set(Body * local, double * remote, double dt, int n, int self);
 void parallel_randomizeBodies(Body * bodies, int nBodies_per_rank, int mype, int nprocs);
-void distributed_write_timestep(Body * local_bodies, long nBodies_per_rank, int timestep, int nIters, int nprocs, int mype, MPI_File * fh);
+void distributed_write_timestep(double * positions, long nBodies, long nBodies_per_rank, int timestep, int mype, MPI_File * fh, MPI_Status status);
+void run_parallel_problem(int nBodies, double dt, int nIters, char * fname);
 #endif

@@ -8,7 +8,6 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
     int mype; // my process id (from 0 .. nprocs-1)
     int stat; // used as error code for MPI calls
     MPI_Status status; // MPI specific error variable
-    MPI_Init(&argc, &args); // do this first to init MPI
     stat = MPI_Comm_size(MPI_COMM_WORLD, &nprocs); // get number of procs
     assert(stat == MPI_SUCCESS); // Check to make sure call worked
     stat = MPI_Comm_rank(MPI_COMM_WORLD, &mype); // get my integer proc id
@@ -50,7 +49,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 
 	// Apply Randomized Initial Conditions to Bodies
 	// TODO make this interesting --> write function
-	parallel_randomizeBodies(Body * bodies, int nBodies_per_rank, int mype, int nprocs);
+	parallel_randomizeBodies(bodies, nBodies_per_rank, mype, nprocs);
 
 
 	// NOTE:
