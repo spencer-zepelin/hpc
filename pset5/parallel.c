@@ -49,7 +49,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 
 	// Apply Randomized Initial Conditions to Bodies
 	// TODO make this interesting --> write function
-	parallel_randomizeBodies(nBodies, nBodies_per_rank, mype, nprocs);
+	parallel_randomizeBodies(bodies, nBodies, nBodies_per_rank, mype, nprocs);
 
 
 	// NOTE:
@@ -196,7 +196,7 @@ void compute_forces_multi_set(Body * bodies, double * remote, double dt, int nBo
 
 
 
-void parallel_randomizeBodies(int nBodies, int nBodies_per_rank, int mype, int nprocs)
+void parallel_randomizeBodies(Body * bodies, int nBodies, int nBodies_per_rank, int mype, int nprocs)
 {
 	uint64_t seed = 42;
 
@@ -242,6 +242,6 @@ void distributed_write_timestep(double * positions, long nBodies, long nBodies_p
 	// Set view for chunk of work
 	MPI_File_set_view(*fh, offset, MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
 	// Collective write
-	MPI_File_write_all(fh, positions, nBodies_per_rank * 3, MPI_DOUBLE, &status);
+	MPI_File_write_all(*fh, positions, nBodies_per_rank * 3, MPI_DOUBLE, &status);
 }
 #endif
