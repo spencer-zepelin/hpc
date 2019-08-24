@@ -19,6 +19,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
     MPI_Cart_create( MPI_COMM_WORLD, 1, &nprocs, &true, 1, &ring_comm );
   	MPI_Cart_shift( ring_comm, 0, 1, &left, &right );
 
+  	printf("I am: %d left is %d, right is %d\n" mype, left, right);
 
 	// Open File
 	MPI_File datafile;
@@ -72,7 +73,10 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 	// Loop over timesteps
 	for (int iter = 0; iter < nIters; iter++)
 	{
-		printf("iteration: %d\n", iter);
+		if (mype == 0){
+			printf("iteration: %d\n", iter);
+		}
+		
 		
 		// TODO openmp
 		// Pack up body positions to write buffer and send buffer
@@ -127,10 +131,12 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 	double interactions = (double) nBodies * (double) nBodies;
 	double interactions_per_sec = interactions / time_per_iter;
 
-	printf("SIMULATION COMPLETE\n");
-	printf("Runtime [s]:              %.3le\n", runtime);
-	printf("Runtime per Timestep [s]: %.3le\n", time_per_iter);
-	printf("Interactions per sec:     %.3le\n", interactions_per_sec);
+	if (mype == 0){
+		printf("SIMULATION COMPLETE\n");
+		printf("Runtime [s]:              %.3le\n", runtime);
+		printf("Runtime per Timestep [s]: %.3le\n", time_per_iter);
+		printf("Interactions per sec:     %.3le\n", interactions_per_sec);		
+	}
 
 	free(bodies);
 	free(positions);
