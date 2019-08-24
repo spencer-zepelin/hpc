@@ -88,7 +88,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 		}
 
 		// Collectively write body positions to file
-		distributed_write_timestep(positions, nBodies, nBodies_per_rank, iter, mype, datafile, status);
+		distributed_write_timestep(positions, nBodies, nBodies_per_rank, iter, mype, &datafile, status);
 
 		// Perform force/velocity calc of own bodies
 		compute_forces_multi_set(bodies, send_buf, dt, nBodies_per_rank, 1);
@@ -117,7 +117,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 	}
 
 	// Close data file
-	MPI_File_close(datafile);
+	MPI_File_close(&datafile);
 
 	// Stop timer
 	double stop = get_time();
@@ -240,7 +240,7 @@ void distributed_write_timestep(double * positions, long nBodies, long nBodies_p
 	int bytes_per_rank = nBodies_per_rank * 3 * sizeof(double); 
 	int offset = header + (bytes_per_step * timestep) + (mype * bytes_per_rank);
 	// Set view for chunk of work
-	MPI_File_set_view(fh, offset, MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
+	MPI_File_set_view(*fh, offset, MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
 	// Collective write
 	MPI_File_write_all(fh, positions, nBodies_per_rank * 3, MPI_DOUBLE, &status);
 }
