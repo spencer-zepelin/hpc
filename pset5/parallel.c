@@ -19,7 +19,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
     MPI_Cart_create( MPI_COMM_WORLD, 1, &nprocs, &true, 1, &ring_comm );
   	MPI_Cart_shift( ring_comm, 0, 1, &left, &right );
 
-  	printf("I am: %d left is %d, right is %d\n", mype, left, right);
+  	printf("I am %d: left-%d right-%d\n", mype, left, right);
 
 	// Open File
 	MPI_File datafile;
@@ -91,20 +91,29 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 			send_buf[r++] = bodies[b].mass;
 		}
 
+		printf("write after this\n");
+
 		// Collectively write body positions to file
 		distributed_write_timestep(positions, nBodies, nBodies_per_rank, iter, mype, &datafile, status);
+
+		printf("self-compute after this\n")
 
 		// Perform force/velocity calc of own bodies
 		compute_forces_multi_set(bodies, send_buf, dt, nBodies_per_rank, 1);
 
+		printf("pipeline after this\n")
+
 		// Pipeline
 		for (int push = 0; push < nprocs-1; push++){
+			MPI_Barrier(ring_comm);
+			printf("pipe send %d", push);
 			// Send left; recv from right
 			MPI_Sendrecv(send_buf, nPositionmass_per_rank, MPI_DOUBLE, left, 99, recv_buf, nPositionmass_per_rank, MPI_DOUBLE, right, MPI_ANY_TAG, ring_comm, &status);
 			// Pointer swap
 			double * tmp = send_buf;
 			send_buf = recv_buf;
 			recv_buf = tmp;
+			printf("pipe calc %d", push);
 			// Perform force/velocity calc on new data
 			compute_forces_multi_set(bodies, send_buf, dt, nBodies_per_rank, 0);
 		}
