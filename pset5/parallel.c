@@ -19,7 +19,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
     MPI_Cart_create( MPI_COMM_WORLD, 1, &nprocs, &true, 1, &ring_comm );
   	MPI_Cart_shift( ring_comm, 0, 1, &left, &right );
 
-  	printf("I am: %d left is %d, right is %d\n" mype, left, right);
+  	printf("I am: %d left is %d, right is %d\n", mype, left, right);
 
 	// Open File
 	MPI_File datafile;
