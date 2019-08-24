@@ -49,7 +49,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 
 	// Apply Randomized Initial Conditions to Bodies
 	// TODO make this interesting --> write function
-	parallel_randomizeBodies(bodies, nBodies_per_rank, mype, nprocs);
+	parallel_randomizeBodies(nBodies, nBodies_per_rank, mype, nprocs);
 
 
 	// NOTE:
@@ -138,7 +138,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 	free(recv_buf);
 }
 
-void compute_forces_multi_set(Body * local, double * remote, double dt, int n, int self)
+void compute_forces_multi_set(Body * bodies, double * remote, double dt, int nBodies_per_rank, int self)
 {
 	double G = 6.67259e-3;
 	double softening = 1.0e-5;
@@ -196,7 +196,7 @@ void compute_forces_multi_set(Body * local, double * remote, double dt, int n, i
 
 
 
-void parallel_randomizeBodies(Body * bodies, int nBodies_per_rank, int mype, int nprocs)
+void parallel_randomizeBodies(int nBodies, int nBodies_per_rank, int mype, int nprocs)
 {
 	uint64_t seed = 42;
 
