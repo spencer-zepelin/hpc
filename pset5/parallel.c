@@ -105,15 +105,18 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 
 		// Pipeline
 		for (int push = 0; push < nprocs-1; push++){
-			MPI_Barrier(ring_comm);
-			printf("pipe send %d", push);
+			// MPI_Barrier(ring_comm);
+			printf("pipe send %d\n", push);
 			// Send left; recv from right
-			MPI_Sendrecv(send_buf, nPositionmass_per_rank, MPI_DOUBLE, left, 99, recv_buf, nPositionmass_per_rank, MPI_DOUBLE, right, MPI_ANY_TAG, ring_comm, &status);
-			// Pointer swap
-			double * tmp = send_buf;
-			send_buf = recv_buf;
-			recv_buf = tmp;
-			printf("pipe calc %d", push);
+			MPI_Sendrecv(send_buf, nPositionmass_per_rank, MPI_DOUBLE, left, 99, 
+						recv_buf, nPositionmass_per_rank, MPI_DOUBLE, right, MPI_ANY_TAG, ring_comm, &status);
+			// // Pointer swap
+			// double * tmp = send_buf;
+			// send_buf = recv_buf;
+			// recv_buf = tmp;
+			MPI_Barrier(ring_comm);
+			memcpy(send_buf, recv_buf, nPositionmass_per_rank * sizeof(double));
+			printf("pipe calc %d\n", push);
 			// Perform force/velocity calc on new data
 			compute_forces_multi_set(bodies, send_buf, dt, nBodies_per_rank, 0);
 		}
