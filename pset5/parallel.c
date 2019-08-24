@@ -96,12 +96,12 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 		// Collectively write body positions to file
 		distributed_write_timestep(positions, nBodies, nBodies_per_rank, iter, mype, &datafile, status);
 
-		printf("self-compute after this\n")
+		printf("self-compute after this\n");
 
 		// Perform force/velocity calc of own bodies
 		compute_forces_multi_set(bodies, send_buf, dt, nBodies_per_rank, 1);
 
-		printf("pipeline after this\n")
+		printf("pipeline after this\n");
 
 		// Pipeline
 		for (int push = 0; push < nprocs-1; push++){
