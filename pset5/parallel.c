@@ -112,7 +112,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 						recv_buf, nPositionmass_per_rank, MPI_DOUBLE, right, MPI_ANY_TAG, ring_comm, &status);
 			int count;
 			MPI_Get_count(&status, MPI_DOUBLE, &count);
-			printf("proc %d received %d doubles", mype, count);
+			printf("proc %d received %d doubles\n", mype, count);
 
 			// // Pointer swap
 			// double * tmp = send_buf;
@@ -127,7 +127,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 
 		//TODO openmp
 		// Update positions of all particles
-		for (int i = 0 ; i < nBodies; i++)
+		for (int i = 0 ; i < nBodies_per_rank; i++)
 		{
 			bodies[i].x += bodies[i].vx*dt;
 			bodies[i].y += bodies[i].vy*dt;
