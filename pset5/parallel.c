@@ -1,5 +1,24 @@
 #include "nbody_header.h"
 
+/* TODO
+
+modify initialization function for interesting starting conditions
+add openmp to code everywhere appropriate
+validate correctness of parallel vs serial
+midway strong scaling study -- pure mpi vs hybrid-mpi-omp
+
+BGQ 
+1) performance analysis (hybrid vs pure; % IO)
+2) strong scaling
+3) production simulation
+4) upload production animation
+
+
+*/
+
+
+
+
 #ifdef MPI
 void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 {
@@ -91,36 +110,36 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 			send_buf[r++] = bodies[b].mass;
 		}
 
-		printf("write after this\n");
+		// printf("write after this\n");
 
 		// Collectively write body positions to file
 		distributed_write_timestep(positions, nBodies, nBodies_per_rank, iter, mype, &datafile, status);
 
-		printf("self-compute after this\n");
+		// printf("self-compute after this\n");
 
 		// Perform force/velocity calc of own bodies
 		compute_forces_multi_set(bodies, send_buf, dt, nBodies_per_rank, 1);
 
-		printf("pipeline after this\n");
+		// printf("pipeline after this\n");
 
 		// Pipeline
 		for (int push = 0; push < nprocs-1; push++){
 			// MPI_Barrier(ring_comm);
-			printf("pipe send %d\n", push);
+			// printf("pipe send %d\n", push);
 			// Send left; recv from right
 			MPI_Sendrecv(send_buf, nPositionmass_per_rank, MPI_DOUBLE, left, 99, 
 						recv_buf, nPositionmass_per_rank, MPI_DOUBLE, right, MPI_ANY_TAG, ring_comm, &status);
 			int count;
 			MPI_Get_count(&status, MPI_DOUBLE, &count);
-			printf("proc %d received %d doubles\n", mype, count);
+			// printf("proc %d received %d doubles\n", mype, count);
 
 			// // Pointer swap
 			// double * tmp = send_buf;
 			// send_buf = recv_buf;
 			// recv_buf = tmp;
-			MPI_Barrier(ring_comm);
+			// MPI_Barrier(ring_comm);
 			memcpy(send_buf, recv_buf, nPositionmass_per_rank * sizeof(double));
-			printf("pipe calc %d\n", push);
+			// printf("pipe calc %d\n", push);
 			// Perform force/velocity calc on new data
 			compute_forces_multi_set(bodies, send_buf, dt, nBodies_per_rank, 0);
 		}
@@ -262,8 +281,8 @@ void distributed_write_timestep(double * positions, int nBodies, int nBodies_per
 	int bytes_per_rank = nBodies_per_rank * 3; 
 	// offset is number of doubles
 	int offset = sizeof(double) * (header + (bytes_per_step * timestep) + (mype * bytes_per_rank));
-	printf("iter: %d proc: %d offset: %d\n", timestep, mype, offset);
-	MPI_Barrier( MPI_COMM_WORLD );
+	// printf("iter: %d proc: %d offset: %d\n", timestep, mype, offset);
+	// MPI_Barrier( MPI_COMM_WORLD );
 	// Set view for chunk of work
 	// MPI_File_set_view(*fh, offset * sizeof(double), MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
 	// Collective write
