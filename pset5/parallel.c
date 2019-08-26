@@ -253,12 +253,14 @@ void parallel_randomizeBodies(Body * bodies, int nBodies, int nBodies_per_rank, 
 // Writes all particle locations for a single timestep
 void distributed_write_timestep(double * positions, long nBodies, long nBodies_per_rank, int timestep, int mype, MPI_File * fh, MPI_Status status)
 {
-	int header = sizeof(int) * 2;
-	int bytes_per_step = nBodies * 3 * sizeof(double); 
-	int bytes_per_rank = nBodies_per_rank * 3 * sizeof(double); 
+	int header = 1;
+	int bytes_per_step = nBodies * 3; 
+	int bytes_per_rank = nBodies_per_rank * 3; 
+	// offset is number of doubles
 	int offset = header + (bytes_per_step * timestep) + (mype * bytes_per_rank);
+	MPI_Barrier( MPI_COMM_WORLD );
 	// Set view for chunk of work
-	MPI_File_set_view(*fh, offset, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL);
+	MPI_File_set_view(*fh, offset, MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
 	// Collective write
 	MPI_File_write_all(*fh, positions, nBodies_per_rank * 3, MPI_DOUBLE, &status);
 }
