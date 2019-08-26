@@ -260,7 +260,7 @@ void distributed_write_timestep(double * positions, long nBodies, long nBodies_p
 	int offset = header + (bytes_per_step * timestep) + (mype * bytes_per_rank);
 	MPI_Barrier( MPI_COMM_WORLD );
 	// Set view for chunk of work
-	MPI_File_set_view(*fh, offset, MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
+	MPI_File_set_view(*fh, offset * sizeof(double), MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
 	// Collective write
 	MPI_File_write_all(*fh, positions, nBodies_per_rank * 3, MPI_DOUBLE, &status);
 }
