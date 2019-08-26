@@ -110,6 +110,10 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 			// Send left; recv from right
 			MPI_Sendrecv(send_buf, nPositionmass_per_rank, MPI_DOUBLE, left, 99, 
 						recv_buf, nPositionmass_per_rank, MPI_DOUBLE, right, MPI_ANY_TAG, ring_comm, &status);
+			int count;
+			MPI_Get_count(&status, MPI_DOUBLE, &count);
+			printf("proc %d received %d doubles", mype, count);
+
 			// // Pointer swap
 			// double * tmp = send_buf;
 			// send_buf = recv_buf;
