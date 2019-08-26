@@ -257,13 +257,14 @@ void distributed_write_timestep(double * positions, int nBodies, int nBodies_per
 	int bytes_per_step = nBodies * 3; 
 	int bytes_per_rank = nBodies_per_rank * 3; 
 	// offset is number of doubles
-	int offset = header + (bytes_per_step * timestep) + (mype * bytes_per_rank);
+	int offset = sizeof(double) * (header + (bytes_per_step * timestep) + (mype * bytes_per_rank));
+	printf("iter: %d proc: %d offset: %d\n", timestep, mype, offset);
 	MPI_Barrier( MPI_COMM_WORLD );
 	// Set view for chunk of work
 	// MPI_File_set_view(*fh, offset * sizeof(double), MPI_DOUBLE, MPI_DOUBLE, "native", MPI_INFO_NULL);
 	// Collective write
 	// MPI_File_write_all(*fh, positions, nBodies_per_rank * 3, MPI_DOUBLE, &status);
-	MPI_File_write_at_all(*fh, offset * sizeof(double), positions, nBodies_per_rank * 3, MPI_DOUBLE, &status);
+	MPI_File_write_at_all(*fh, offset, positions, nBodies_per_rank * 3, MPI_DOUBLE, &status);
 
 }
 #endif
