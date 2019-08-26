@@ -172,9 +172,9 @@ void compute_forces_multi_set(Body * bodies, double * remote, double dt, int nBo
 		for (int j = 0; j < nBodies_per_rank; j++)
 		{
 			// Unless computing force on self
-			if (self && i == j){
-				continue;
-			}
+			// if (self && i == j){
+			// 	continue;
+			// }
 
 			// F_ij = G * [ (m_i * m_j) / distance^3 ] * (location_j - location_i) 
 
