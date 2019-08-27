@@ -99,7 +99,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname, int 
 		
 		// TODO openmp
 		// Pack up body positions to write buffer and send buffer
-#pragma omp parallel for default(private) shared(positions, send_buf, bodies) schedule(static)
+#pragma omp parallel for private(nBodies_per_rank) shared(positions, send_buf, bodies) schedule(static)
 		for( int b = 0; b < nBodies_per_rank; b++ )
 		{
 			int p = b * 3;
@@ -148,7 +148,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname, int 
 		}
 
 		// Update positions of all particles
-#pragma omp parallel for default(private) shared(bodies) schedule(static)
+#pragma omp parallel for private(dt, nBodies_per_rank) shared(bodies) schedule(static)
 		for (int i = 0 ; i < nBodies_per_rank; i++)
 		{
 			bodies[i].x += bodies[i].vx*dt;
