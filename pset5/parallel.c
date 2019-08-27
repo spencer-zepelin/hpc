@@ -20,7 +20,7 @@ BGQ
 
 
 #ifdef MPI
-void run_parallel_problem(int nBodies, double dt, int nIters, char * fname, int nt)
+void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 {
 	// MPI initialization
 	int nprocs; // number of processes (aka "procs") used in this invocation
@@ -188,7 +188,7 @@ void compute_forces_multi_set(Body * bodies, double * remote, double dt, int nBo
 	double softening = 1.0e-5;
 
 	// For each particle in the local
-#pragma omp parallel for default(private) shared(remote, bodies) schedule(static)
+#pragma omp parallel for private(nBodies_per_rank) shared(remote, bodies) schedule(static)
 	for (int i = 0; i < nBodies_per_rank; i++)
 	{ 
 		double Fx = 0.0;
