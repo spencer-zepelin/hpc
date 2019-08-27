@@ -271,9 +271,9 @@ void parallel_randomizeBodies(Body * bodies, int nBodies, int nBodies_per_rank, 
 		bodies[i].z = (2.0 * d3 - 1.0) * 0.1;
 
 		// Intialize velocities
-		bodies[i].vx =  2.0 * vm * d1 - vm;
-		bodies[i].vy =  2.0 * vm * d2 - vm;
-		bodies[i].vz = (2.0 * vm * d3 - vm) * 0.1;
+		bodies[i].vx =  -(2.0 * vm * d1 - vm);
+		bodies[i].vy =  -(2.0 * vm * d2 - vm);
+		bodies[i].vz = -(2.0 * vm * d3 - vm) * 0.1;
 
 
 		// Initialize masses so that total mass of system is constant
