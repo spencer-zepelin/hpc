@@ -248,7 +248,7 @@ void parallel_randomizeBodies(Body * bodies, int nBodies, int nBodies_per_rank, 
 	// velocity scaling term
 	double vm = 1.0e-2;
 	// TODO openmp
-#pragma omp parallel for default(private) shared(bodies) schedule(static)
+#pragma omp parallel for private(nBodies_per_rank, seed, vm, mype, nBodies) shared(bodies) schedule(static)
 	for (int i = 0; i < nBodies_per_rank; i++)
 	{
 		int global_particle_id = (mype * nBodies_per_rank) + i;
