@@ -5,7 +5,7 @@
 COMPILER    = gnu
 OPTIMIZE    = no
 MPI         = yes
-OPENMP      = no
+OPENMP      = yes
 DEBUG       = no
 PROFILE     = no
 

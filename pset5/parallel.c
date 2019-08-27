@@ -20,7 +20,7 @@ BGQ
 
 
 #ifdef MPI
-void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
+void run_parallel_problem(int nBodies, double dt, int nIters, char * fname, int nt)
 {
 	// MPI initialization
 	int nprocs; // number of processes (aka "procs") used in this invocation
@@ -99,15 +99,18 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 		
 		// TODO openmp
 		// Pack up body positions to write buffer and send buffer
-		for( int b = 0, p = 0, r = 0; b < nBodies_per_rank; b++ )
+#pragma omp parallel for default(private) shared(positions, send_buf, bodies) schedule(static)
+		for( int b = 0; b < nBodies_per_rank; b++ )
 		{
+			int p = b * 3;
+			int r = b * 4;
 			positions[p++] = bodies[b].x;
 			positions[p++] = bodies[b].y;
-			positions[p++] = bodies[b].z;
+			positions[p] = bodies[b].z;
 			send_buf[r++] = bodies[b].x;
 			send_buf[r++] = bodies[b].y;
 			send_buf[r++] = bodies[b].z;
-			send_buf[r++] = bodies[b].mass;
+			send_buf[r] = bodies[b].mass;
 		}
 
 		// printf("write after this\n");
@@ -144,8 +147,8 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 			compute_forces_multi_set(bodies, send_buf, dt, nBodies_per_rank, 0);
 		}
 
-		//TODO openmp
 		// Update positions of all particles
+#pragma omp parallel for default(private) shared(bodies) schedule(static)
 		for (int i = 0 ; i < nBodies_per_rank; i++)
 		{
 			bodies[i].x += bodies[i].vx*dt;
@@ -185,6 +188,7 @@ void compute_forces_multi_set(Body * bodies, double * remote, double dt, int nBo
 	double softening = 1.0e-5;
 
 	// For each particle in the local
+#pragma omp parallel for default(private) shared(remote, bodies) schedule(static)
 	for (int i = 0; i < nBodies_per_rank; i++)
 	{ 
 		double Fx = 0.0;
@@ -244,6 +248,7 @@ void parallel_randomizeBodies(Body * bodies, int nBodies, int nBodies_per_rank, 
 	// velocity scaling term
 	double vm = 1.0e-2;
 	// TODO openmp
+#pragma omp parallel for default(private) shared(bodies) schedule(static)
 	for (int i = 0; i < nBodies_per_rank; i++)
 	{
 		int global_particle_id = (mype * nBodies_per_rank) + i;
