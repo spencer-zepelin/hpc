@@ -275,6 +275,16 @@ void parallel_randomizeBodies(Body * bodies, int nBodies, int nBodies_per_rank, 
 		bodies[i].vy =  -(2.0 * vm * d2 - vm);
 		bodies[i].vz = -(2.0 * vm * d3 - vm) * 0.1;
 
+		if( bodies[i].x > 0 ){
+			bodies[i].vy =  2*fabs(bodies[i].vy);
+		} else {
+			bodies[i].vy =  -2*fabs(bodies[i].vy);
+		}
+		if( bodies[i].y > 0 ){
+			bodies[i].vx =  -2*fabs(bodies[i].vx);
+		} else {
+			bodies[i].vx =  2*fabs(bodies[i].vx);
+		}
 
 		// Initialize masses so that total mass of system is constant
 		// regardless of how many bodies are simulated.
