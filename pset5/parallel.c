@@ -259,23 +259,22 @@ void parallel_randomizeBodies(Body * bodies, int nBodies, int nBodies_per_rank, 
 		int global_particle_id = (mype * nBodies_per_rank) + i;
 		// Fast forward seed to this particle's location in the global PRNG stream.
 		// We forward 7 x particle_id, as each particle requires 7 PRNG samples.
-		uint64_t particle_seed = fast_forward_LCG(seed, global_particle_id * 7);
+		uint64_t particle_seed = fast_forward_LCG(seed, global_particle_id * 4);
 
 		// Initialize positions
-		bodies[i].x =  2.0 * LCG_random_double(&particle_seed) - 1.0;
-		bodies[i].y =  2.0 * LCG_random_double(&particle_seed) - 1.0;
-		bodies[i].z = (2.0 * LCG_random_double(&particle_seed) - 1.0) * 0.1;
+		double d1 = LCG_random_double(&particle_seed);
+		double d2 = LCG_random_double(&particle_seed);
+		double d3 = LCG_random_double(&particle_seed);
+
+		bodies[i].x =  2.0 * d1 - 1.0;
+		bodies[i].y =  2.0 * d2 - 1.0;
+		bodies[i].z = (2.0 * d3 - 1.0) * 0.1;
 
 		// Intialize velocities
-		bodies[i].vx =  2.0 * vm * LCG_random_double(&particle_seed) - vm;
-		bodies[i].vy =  2.0 * vm * LCG_random_double(&particle_seed) - vm;
-		bodies[i].vz = (2.0 * vm * LCG_random_double(&particle_seed) - vm) * 0.1;
+		bodies[i].vx =  2.0 * vm * d1 - vm;
+		bodies[i].vy =  2.0 * vm * d2 - vm;
+		bodies[i].vz = (2.0 * vm * d3 - vm) * 0.1;
 
-		// Give it a spin
-		if( bodies[i].x > 0 )
-			bodies[i].vy =  5*fabs(bodies[i].vy);
-		else
-			bodies[i].vy = -5*fabs(bodies[i].vy);
 
 		// Initialize masses so that total mass of system is constant
 		// regardless of how many bodies are simulated.
@@ -290,7 +289,7 @@ void distributed_write_timestep(double * positions, int nBodies, int nBodies_per
 	int bytes_per_step = nBodies * 3; 
 	int bytes_per_rank = nBodies_per_rank * 3; 
 	// offset is number of doubles
-	int offset = sizeof(double) * (header + (bytes_per_step * timestep) + (mype * bytes_per_rank));
+	MPI_Offset offset = sizeof(double) * (header + (bytes_per_step * timestep) + (mype * bytes_per_rank));
 	// printf("iter: %d proc: %d offset: %d\n", timestep, mype, offset);
 	// MPI_Barrier( MPI_COMM_WORLD );
 	// Set view for chunk of work
