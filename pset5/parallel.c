@@ -96,10 +96,10 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 			printf("iteration: %d\n", iter);
 		}
 		
-		
-		// TODO openmp
 		// Pack up body positions to write buffer and send buffer
+#ifdef OPENMP
 #pragma omp parallel for shared(positions, send_buf, bodies) schedule(static)
+#endif
 		for( int b = 0; b < nBodies_per_rank; b++ )
 		{
 			int p = b * 3;
@@ -148,7 +148,9 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 		}
 
 		// Update positions of all particles
+#ifdef OPENMP
 #pragma omp parallel for shared(bodies) schedule(static)
+#endif
 		for (int i = 0 ; i < nBodies_per_rank; i++)
 		{
 			bodies[i].x += bodies[i].vx*dt;
@@ -188,7 +190,9 @@ void compute_forces_multi_set(Body * bodies, double * remote, double dt, int nBo
 	double softening = 1.0e-5;
 
 	// For each particle in the local
+#ifdef OPENMP
 #pragma omp parallel for shared(remote, bodies) schedule(static)
+#endif
 	for (int i = 0; i < nBodies_per_rank; i++)
 	{ 
 		double Fx = 0.0;
@@ -247,8 +251,9 @@ void parallel_randomizeBodies(Body * bodies, int nBodies, int nBodies_per_rank, 
 
 	// velocity scaling term
 	double vm = 1.0e-2;
-	// TODO openmp
+#ifdef OPENMP
 #pragma omp parallel for shared(bodies) schedule(static)
+#endif
 	for (int i = 0; i < nBodies_per_rank; i++)
 	{
 		int global_particle_id = (mype * nBodies_per_rank) + i;
