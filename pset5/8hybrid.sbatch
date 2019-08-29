@@ -6,4 +6,4 @@
 #SBATCH --cpus-per-task=28
 #SBATCH --exclusive
 module load openmpi
-mpirun -n 8 ./nbody_pure 100352 10 0.1 28
+mpirun -n 8 ./nbody_hybrid 100352 10 0.1 28
