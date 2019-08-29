@@ -187,7 +187,7 @@ void compute_forces_multi_set(Body * bodies, double * remote, double dt, int nBo
 		// Compute force from all other particles in the remote
 		for (int j = 0; j < nBodies_per_rank; j++)
 		{
-			Unless computing force on self
+			// Unless computing force on self
 			if (self && i == j){
 				continue;
 			}
