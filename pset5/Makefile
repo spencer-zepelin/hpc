@@ -80,5 +80,8 @@ clean:
 edit:
 	vim -p $(source) nbody_header.h
 
-run:
+run: $(program)
 	./$(program)
+
+mpi: $(program)
+	mpirun -n 2 ./$(program)
