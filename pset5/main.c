@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
 	double dt = 0.2; 
 	int nIters = 200;
 	int nthreads = 1;
-	char * fname = "nbody.dat";
+	char * fname = "nbody_prod.dat";
 
 	if( argc != 5 )
 	{
