@@ -9,10 +9,10 @@ int main(int argc, char* argv[])
 	int nthreads = 1;
 	char * fname = "nbody.dat";
 
-	if( argc != 6 )
+	if( argc != 5 )
 	{
 		printf("Usage: ./nbody_serial <number of bodies> <number of iterations> <timestep length (dt)> <number of OpenMP threads per rank>\n");
-		printf("Using defaults for now...\n");
+		printf("Using defaults for any unspecified arguments...\n");
 	}
 
 	if( argc > 1 )
