@@ -2,19 +2,12 @@
 
 /* TODO
 
-modify initialization function for interesting starting conditions
-add openmp to code everywhere appropriate
-validate correctness of parallel vs serial
-midway strong scaling study -- pure mpi vs hybrid-mpi-omp
-
-delete unnecessary print statements
 
 BGQ 
 1) performance analysis (hybrid vs pure; % IO)
 2) strong scaling
 3) production simulation
 4) upload production animation
-
 
 */
 
@@ -41,11 +34,11 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
   	MPI_Cart_shift( ring_comm, 0, 1, &left, &right );
 
 	// Open File
-	MPI_File datafile;
-	MPI_File_open( MPI_COMM_WORLD, fname, 
-	    	MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &datafile);
-	// Check file opened successfully
-	assert(datafile != NULL);
+	// MPI_File datafile;
+	// MPI_File_open( MPI_COMM_WORLD, fname, 
+	//     	MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &datafile);
+	// // Check file opened successfully
+	// assert(datafile != NULL);
 	
 	// When we open the this binary file for plotting, we will make some assumptions as to
 	// size of data types we are writing. As such, we enforce these assumptions here.
@@ -54,10 +47,10 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 
 	// Write Header Info
 	// Only rank zero!
-	if (mype == 0){
-		MPI_File_write(datafile, &nBodies, 1, MPI_INT, &status);
-		MPI_File_write(datafile, &nIters, 1, MPI_INT, &status);
-	}
+	// if (mype == 0){
+	// 	MPI_File_write(datafile, &nBodies, 1, MPI_INT, &status);
+	// 	MPI_File_write(datafile, &nIters, 1, MPI_INT, &status);
+	// }
 
 	// Assume even distribution of bodies over ranks
 	assert(nBodies % nprocs == 0);
@@ -88,7 +81,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 	// Start timer
 	double start = get_time();
 
-	// Loop over timesteps
+/* MAIN LOOP */ 
 	for (int iter = 0; iter < nIters; iter++)
 	{
 		if (mype == 0){
@@ -113,7 +106,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 		}
 
 		// Collectively write body positions to file
-		distributed_write_timestep(positions, nBodies, nBodies_per_rank, iter, mype, &datafile, status);
+		// distributed_write_timestep(positions, nBodies, nBodies_per_rank, iter, mype, &datafile, status);
 
 
 		// Perform force/velocity calc of own bodies
@@ -146,7 +139,7 @@ void run_parallel_problem(int nBodies, double dt, int nIters, char * fname)
 	}
 
 	// Close data file
-	MPI_File_close(&datafile);
+	// MPI_File_close(&datafile);
 
 	// Stop timer
 	double stop = get_time();

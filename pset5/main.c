@@ -11,7 +11,8 @@ int main(int argc, char* argv[])
 
 	if( argc != 5 )
 	{
-		printf("Usage: ./nbody_serial <number of bodies> <number of iterations> <timestep length (dt)> <number of OpenMP threads per rank>\n");
+		printf("Serial usage: ./nbody <number of bodies> <number of iterations> <timestep length (dt)> <number of OpenMP threads per rank>\n");
+		printf("Parallel usage: mpirun -n <number of ranks> ./nbody <number of bodies> <number of iterations> <timestep length (dt)> <number of OpenMP threads per rank>");
 		printf("Using defaults for any unspecified arguments...\n");
 	}
 
